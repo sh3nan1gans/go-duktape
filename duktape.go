@@ -12,8 +12,6 @@ package duktape
 #include "duk_print_alert.h"
 #include "duk_module_duktape.h"
 #include "duk_console.h"
-#include "./dukluv/src/duv.h"
-#include "./dukluv/src/misc.h"
 extern duk_ret_t goFunctionCall(duk_context *ctx);
 extern void goFinalizeCall(duk_context *ctx);
 */
