@@ -6,14 +6,19 @@ package duktape
 #cgo linux LDFLAGS: -lm
 #cgo freebsd LDFLAGS: -lm
 #cgo openbsd LDFLAGS: -lm
+#cgo CFLAGS: -I${SRCDIR}/dukluv/lib/uv/include
 
 #include "duktape.h"
 #include "duk_logging.h"
 #include "duk_print_alert.h"
 #include "duk_module_duktape.h"
 #include "duk_console.h"
+#include "./dukluv/src/duv.h"
+#include "./dukluv/src/misc.h"
+#include <uv.h>
 extern duk_ret_t goFunctionCall(duk_context *ctx);
 extern void goFinalizeCall(duk_context *ctx);
+extern int uv_loop_init(uv_loop_t* loop);
 */
 import "C"
 import (

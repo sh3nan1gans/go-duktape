@@ -1,4 +1,3 @@
-[submodule "lib/dukluv"]
-	url = https://github.com/sh3nan1gans/dukluv.git
-	ref = master
-	path = lib/dukluv
+[submodule "dukluv"]
+	path = dukluv
+	url = https://github.com/sh3nan1gans/dukluv
