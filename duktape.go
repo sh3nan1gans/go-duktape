@@ -12,8 +12,10 @@ package duktape
 #include "duk_print_alert.h"
 #include "duk_module_duktape.h"
 #include "duk_console.h"
+#include "poll.h"
 extern duk_ret_t goFunctionCall(duk_context *ctx);
 extern void goFinalizeCall(duk_context *ctx);
+extern void poll_register(duk_context *ctx);
 */
 import "C"
 import (
@@ -60,6 +62,7 @@ func New() *Context {
 	}
 
 	ctx := d.duk_context
+	C.poll_register(ctx, 0)
 	C.duk_logging_init(ctx, 0)
 	C.duk_print_alert_init(ctx, 0)
 	C.duk_module_duktape_init(ctx)
