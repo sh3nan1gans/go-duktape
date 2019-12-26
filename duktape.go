@@ -12,6 +12,8 @@ package duktape
 #include "duk_print_alert.h"
 #include "duk_module_duktape.h"
 #include "duk_console.h"
+#include "./dukluv/src/duv.h"
+#include "./dukluv/src/misc.h"
 extern duk_ret_t goFunctionCall(duk_context *ctx);
 extern void goFinalizeCall(duk_context *ctx);
 */
@@ -64,6 +66,7 @@ func New() *Context {
 	C.duk_print_alert_init(ctx, 0)
 	C.duk_module_duktape_init(ctx)
 	C.duk_console_init(ctx, 0)
+	C.uv_loop_init(ctx)
 
 	return d
 }
