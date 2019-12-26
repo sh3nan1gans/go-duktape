@@ -29,4 +29,7 @@ func main() {
 	if err := ctx.PevalString(string(b)); err != nil {
 		log.Fatal(err)
 	}
+
+	// run the event loop after user code has been processed, otherwise the event loop thinks there aren't any timers or sockets to process
+	duktape.EventLoopRun(ctx)
 }
