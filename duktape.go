@@ -6,10 +6,12 @@ package duktape
 #cgo linux LDFLAGS: -lm
 #cgo freebsd LDFLAGS: -lm
 #cgo openbsd LDFLAGS: -lm
+#cgo CFLAGS: -I${SRCDIR}/dukluv/lib/uv
 #cgo CFLAGS: -I${SRCDIR}/dukluv/lib/uv/include
 #cgo LDFLAGS: ${SRCDIR}/dukluv/build/libdschema.a
 #cgo LDFLAGS: ${SRCDIR}/dukluv/build/libduktape.a
 #cgo LDFLAGS: ${SRCDIR}/dukluv/build/libduv.a
+#cgo LDFLAGS: ${SRCDIR}/dukluv/build/lib/uv/libuv_a.a
 #include "duktape.h"
 #include "duk_logging.h"
 #include "duk_print_alert.h"
@@ -18,7 +20,6 @@ package duktape
 #include "./dukluv/lib/uv/include/uv.h"
 extern duk_ret_t goFunctionCall(duk_context *ctx);
 extern void goFinalizeCall(duk_context *ctx);
-extern int uv_loop_init(uv_loop_t* loop);
 */
 import "C"
 import (
@@ -69,7 +70,7 @@ func New() *Context {
 	C.duk_print_alert_init(ctx, 0)
 	C.duk_module_duktape_init(ctx)
 	C.duk_console_init(ctx, 0)
-	C.uv_loop_init(ctx)
+	C.uv_loop_init(&C.struct_uv_loop_s{})
 
 	return d
 }
