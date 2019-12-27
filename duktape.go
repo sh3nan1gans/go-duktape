@@ -1,8 +1,8 @@
 package duktape
 
 /*
-#cgo !windows CFLAGS: -std=c99 -O3 -Wall -fomit-frame-pointer -fstrict-aliasing
-#cgo windows CFLAGS: -O3 -Wall -fomit-frame-pointer -fstrict-aliasing
+#cgo !windows CFLAGS: -std=c99 -O3 -fomit-frame-pointer -fstrict-aliasing
+#cgo windows CFLAGS: -O3 -fomit-frame-pointer -fstrict-aliasing
 #cgo linux LDFLAGS: -lm
 #cgo freebsd LDFLAGS: -lm
 #cgo openbsd LDFLAGS: -lm
@@ -18,6 +18,39 @@ package duktape
 #include "duk_module_duktape.h"
 #include "duk_console.h"
 #include "./dukluv/lib/uv/include/uv.h"
+#include "./dukluv/src/duv.h"
+
+static inline uv_loop_t *create_loop()
+{
+    uv_loop_t *loop = malloc(sizeof(uv_loop_t));
+    if (loop)
+    {
+        uv_loop_init(loop);
+    }
+    return loop;
+}
+
+static inline void loop_init(void) {
+	uv_loop_t *loop = create_loop();
+    duk_context *ctx = NULL;
+
+    ctx = duk_create_heap(NULL, NULL, NULL, &loop, NULL);
+    if (!ctx)
+    {
+        fprintf(stderr, "Problem initiailizing duktape heap\n");
+        return;
+    }
+
+    duk_push_global_object(ctx);
+    duk_push_c_function(ctx, dukopen_uv, 0);
+    duk_call(ctx, 0);
+    duk_put_prop_string(ctx, -2, "uv");
+    uv_run(loop, UV_RUN_DEFAULT);
+
+    uv_loop_close(loop);
+    duk_destroy_heap(ctx);
+}
+
 extern duk_ret_t goFunctionCall(duk_context *ctx);
 extern void goFinalizeCall(duk_context *ctx);
 */
@@ -70,7 +103,27 @@ func New() *Context {
 	C.duk_print_alert_init(ctx, 0)
 	C.duk_module_duktape_init(ctx)
 	C.duk_console_init(ctx, 0)
-	C.uv_loop_init(&C.struct_uv_loop_s{})
+
+	return d
+}
+
+// NewWithEventLoop returns plain initialized duktape context object
+// See: http://duktape.org/api.html#duk_create_heap_default
+func NewWithEventLoop() *Context {
+	C.loop_init()
+	d := &Context{
+		&context{
+			duk_context: C.duk_create_heap(nil, nil, nil, nil, nil),
+			fnIndex:     newFunctionIndex(),
+			timerIndex:  &timerIndex{},
+		},
+	}
+
+	ctx := d.duk_context
+	C.duk_logging_init(ctx, 0)
+	C.duk_print_alert_init(ctx, 0)
+	C.duk_module_duktape_init(ctx)
+	C.duk_console_init(ctx, 0)
 
 	return d
 }

@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	ctx := duktape.New()
+	ctx := duktape.NewWithEventLoop()
 	ctx.PevalString(`var console = {log:print,warn:print,error:print,info:print}`)
 	if len(os.Args) < 2 {
 		log.Fatal("expected an input file")
