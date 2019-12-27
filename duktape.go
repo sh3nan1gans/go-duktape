@@ -18,39 +18,7 @@ package duktape
 #include "duk_module_duktape.h"
 #include "duk_console.h"
 #include "./dukluv/lib/uv/include/uv.h"
-#include "./dukluv/src/duv.h"
-
-static inline uv_loop_t *create_loop()
-{
-    uv_loop_t *loop = malloc(sizeof(uv_loop_t));
-    if (loop)
-    {
-        uv_loop_init(loop);
-    }
-    return loop;
-}
-
-static inline void loop_init(void) {
-	uv_loop_t *loop = create_loop();
-    duk_context *ctx = NULL;
-
-    ctx = duk_create_heap(NULL, NULL, NULL, &loop, NULL);
-    if (!ctx)
-    {
-        fprintf(stderr, "Problem initiailizing duktape heap\n");
-        return;
-    }
-
-    duk_push_global_object(ctx);
-    duk_push_c_function(ctx, dukopen_uv, 0);
-    duk_call(ctx, 0);
-    duk_put_prop_string(ctx, -2, "uv");
-    uv_run(loop, UV_RUN_DEFAULT);
-
-    uv_loop_close(loop);
-    duk_destroy_heap(ctx);
-}
-
+#include "loop_init.h"
 extern duk_ret_t goFunctionCall(duk_context *ctx);
 extern void goFinalizeCall(duk_context *ctx);
 */
