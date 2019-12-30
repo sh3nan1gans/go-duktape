@@ -5,6 +5,7 @@ var clearTimeout;
   var my_timers = {};
   var timer_id = 0;
   setTimeout = function(func, delay) {
+    console.log("inside setTimeout def");
     var cb_func;
     var bind_args;
 
@@ -38,7 +39,9 @@ var clearTimeout;
     var timer = uv.new_timer.call(context);
     my_timers[timer_id] = timer;
 
+    console.log("before timer_start");
     uv.timer_start(timer, delay, 0, function() {
+      console.log("in callback");
       uv.close.call(context, timer, function() {});
       delete my_timers[timer_id];
       cb_func();

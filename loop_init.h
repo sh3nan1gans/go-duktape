@@ -8,7 +8,13 @@ extern "C"
 {
 #endif
 
-    extern void loop_init();
+    typedef struct
+    {
+        duk_context *ctx;
+        uv_loop_t *loop;
+    } loop_init_rtn;
+
+    extern loop_init_rtn loop_init();
 
 #if defined(__cplusplus)
 }

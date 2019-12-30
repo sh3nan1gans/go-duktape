@@ -53,6 +53,7 @@ type context struct {
 	duk_context *C.duk_context
 	fnIndex     *functionIndex
 	timerIndex  *timerIndex
+	loop        *C.uv_loop_t
 }
 
 // New returns plain initialized duktape context object
@@ -78,12 +79,13 @@ func New() *Context {
 // NewWithEventLoop returns plain initialized duktape context object
 // See: http://duktape.org/api.html#duk_create_heap_default
 func NewWithEventLoop() *Context {
-	C.loop_init()
+	thing := C.loop_init()
 	d := &Context{
 		&context{
-			duk_context: C.duk_create_heap(nil, nil, nil, nil, nil),
+			duk_context: thing.ctx,
 			fnIndex:     newFunctionIndex(),
 			timerIndex:  &timerIndex{},
+			loop:        thing.loop,
 		},
 	}
 

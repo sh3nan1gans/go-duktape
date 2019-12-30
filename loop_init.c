@@ -73,7 +73,7 @@ uv_loop_t *create_loop()
 //     return 0;
 // }
 
-void loop_init()
+loop_init_rtn loop_init()
 {
     printf("loop_init!");
     uv_loop_t *loop = create_loop();
@@ -93,11 +93,15 @@ void loop_init()
     if (!ctx)
     {
         fprintf(stderr, "Problem initiailizing duktape heap\n");
-        return;
+        loop_init_rtn temp = {
+            .ctx = ctx,
+            .loop = loop,
+        };
+        return temp;
     }
     // duk_module_duktape_init(ctx);
     // duk_console_init(ctx, 0);
-    // loop.data = ctx;
+    loop->data = ctx;
 
     // Stash argv for later access
     // duk_push_pointer(ctx, (void *)argv);
@@ -129,7 +133,18 @@ void loop_init()
     //     return 1;
     // }
 
-    uv_loop_close(loop);
-    duk_destroy_heap(ctx);
-    return;
+    loop_init_rtn temp = {
+        .ctx = ctx,
+        .loop = loop,
+    };
+    return temp;
+    // rtn = &temp;
+    // return rtn;
+    // uv_loop_close(loop);
+    // duk_destroy_heap(ctx);
+    // return struct * loop_init_rtn
+    // {
+    // ctx:
+    //     ctx
+    // }
 }
