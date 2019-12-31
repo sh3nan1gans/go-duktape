@@ -18,7 +18,7 @@ package duktape
 #include "duk_module_duktape.h"
 #include "duk_console.h"
 #include "./dukluv/lib/uv/include/uv.h"
-#include "loop_de_loop.h"
+#include "loop_utils.h"
 extern duk_ret_t goFunctionCall(duk_context *ctx);
 extern void goFinalizeCall(duk_context *ctx);
 */
@@ -79,13 +79,13 @@ func New() *Context {
 // NewWithEventLoop returns plain initialized duktape context object
 // See: http://duktape.org/api.html#duk_create_heap_default
 func NewWithEventLoop() *Context {
-	thing := C.loop_de_loop()
+	loopInit := C.loop_init()
 	d := &Context{
 		&context{
-			duk_context: thing.ctx,
+			duk_context: loopInit.ctx,
 			fnIndex:     newFunctionIndex(),
 			timerIndex:  &timerIndex{},
-			loop:        thing.loop,
+			loop:        loopInit.loop,
 		},
 	}
 

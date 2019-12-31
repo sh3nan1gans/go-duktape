@@ -3,7 +3,7 @@
 
 #include "duk_module_duktape.h"
 #include "duk_console.h"
-#include "loop_init.h"
+#include "loop_utils.h"
 
 static uv_loop_t loop;
 
@@ -496,14 +496,12 @@ static duk_ret_t duv_main(duk_context *ctx)
     duk_push_object(ctx);
     duk_push_c_function(ctx, duv_cwd, 0);
     duk_call(ctx, 0);
-    duk_push_string(ctx, "/loop_de_loop.c");
+    duk_push_string(ctx, "/loop_utils.c");
     duk_concat(ctx, 2);
     duk_put_prop_string(ctx, -2, "id");
     duk_dup(ctx, 0);
     // this is the call that allows for uv timers
     duk_call_method(ctx, 1);
-
-    // uv_run(&loop, UV_RUN_DEFAULT);
 
     return 0;
 }
@@ -543,21 +541,12 @@ static void duv_dump_error(duk_context *ctx, duk_idx_t idx)
     }
 }
 
-loop_init_rtn loop_de_loop()
+loop_init_rtn loop_init()
 {
-    // int argc = 2;
+    // todo: inline timers.js
     char *argv[] = {"./dukluv", "timers.js"};
-    printf("loop de loop!");
     duk_context *ctx = NULL;
     uv_loop_init(&loop);
-
-    // uv_setup_args(argc, argv);
-
-    // if (argc < 2)
-    // {
-    //     fprintf(stderr, "Usage: dukluv script.js\n");
-    //     exit(1);
-    // }
 
     // Tie loop and context together
     ctx = duk_create_heap(NULL, NULL, NULL, &loop, NULL);
@@ -574,18 +563,6 @@ loop_init_rtn loop_de_loop()
     duk_console_init(ctx, 0);
     loop.data = ctx;
 
-    // Stash argv for later access
-    // duk_push_pointer(ctx, (void *)argv);
-    // duk_push_int(ctx, argc);
-    // if (duk_safe_call(ctx, duv_stash_argv, NULL, 2, 1))
-    // {
-    //     duv_dump_error(ctx, -1);
-    //     uv_loop_close(&loop);
-    //     duk_destroy_heap(ctx);
-    //     return 1;
-    // }
-    // duk_pop(ctx);
-
     duk_push_c_function(ctx, duv_main, 1);
     duk_push_string(ctx, argv[1]);
     if (duk_pcall(ctx, 1))
@@ -599,16 +576,20 @@ loop_init_rtn loop_de_loop()
         };
         return temp;
     }
-    // duk_peval_string(ctx, "console.log('what is setTimeout', typeof setTimeout)");
-    duk_peval_string(ctx, "console.log('hi'); console.log('before timeout'); setTimeout(function() { console.log('inside timeout'); var id = setTimeout(function() { console.log('inside second timeout'); }, 2000); console.log('after first', id); setTimeout(function() { console.log('inside faster timeout'); }, 1000); }, 1000); console.log('after timeout');");
-    uv_run(&loop, UV_RUN_DEFAULT);
 
-    // uv_loop_close(&loop);
-    // duk_destroy_heap(ctx);
     loop_init_rtn temp = {
         .ctx = ctx,
         .loop = &loop,
     };
-    printf("loop_de_loop final return!!1\n");
     return temp;
+}
+
+void loop_run(uv_loop_t *loop)
+{
+    uv_run(loop, UV_RUN_DEFAULT);
+}
+
+void loop_close(uv_loop_t *loop)
+{
+    uv_loop_close(loop);
 }

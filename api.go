@@ -8,6 +8,7 @@ package duktape
 #include "duk_logging.h"
 #include "duk_v1_compat.h"
 #include "duk_print_alert.h"
+#include "loop_utils.h"
 static void _duk_eval_string(duk_context *ctx, const char *str) {
   duk_eval_string(ctx, str);
 }
@@ -881,6 +882,16 @@ func (d *Context) PevalString(src string) error {
 	__src__ := C.CString(src)
 	result := int(C._duk_peval_string(d.duk_context, __src__))
 	C.free(unsafe.Pointer(__src__))
+	return d.castStringToError(result)
+}
+
+// See: http://duktape.org/api.html#duk_peval_string
+func (d *Context) PevalStringWithLoop(src string) error {
+	__src__ := C.CString(src)
+	result := int(C._duk_peval_string(d.duk_context, __src__))
+	C.loop_run(d.loop)
+	C.free(unsafe.Pointer(__src__))
+	C.loop_close(d.loop)
 	return d.castStringToError(result)
 }
 

@@ -27,8 +27,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println("Calling PevalString")
-	if err := ctx.PevalString(string(b)); err != nil {
+	// fmt.Println("Calling PevalString")
+	// if err := ctx.PevalString(string(b)); err != nil {
+	// 	log.Fatal(err)
+	// }
+	fmt.Println("Calling PevalStringWithLoop")
+	if err := ctx.PevalStringWithLoop(string(b)); err != nil {
 		log.Fatal(err)
 	}
 }
