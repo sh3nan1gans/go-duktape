@@ -79,20 +79,21 @@ func New() *Context {
 // NewWithEventLoop returns plain initialized duktape context object
 // See: http://duktape.org/api.html#duk_create_heap_default
 func NewWithEventLoop() *Context {
-	C.loop_de_loop()
+	thing := C.loop_de_loop()
 	d := &Context{
 		&context{
-			duk_context: C.duk_create_heap(nil, nil, nil, nil, nil),
+			duk_context: thing.ctx,
 			fnIndex:     newFunctionIndex(),
 			timerIndex:  &timerIndex{},
+			loop:        thing.loop,
 		},
 	}
 
-	ctx := d.duk_context
-	C.duk_logging_init(ctx, 0)
-	C.duk_print_alert_init(ctx, 0)
-	C.duk_module_duktape_init(ctx)
-	C.duk_console_init(ctx, 0)
+	// ctx := d.duk_context
+	// C.duk_logging_init(ctx, 0)
+	// C.duk_print_alert_init(ctx, 0)
+	// C.duk_module_duktape_init(ctx)
+	// C.duk_console_init(ctx, 0)
 
 	return d
 }

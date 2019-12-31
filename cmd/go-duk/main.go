@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -26,6 +27,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	fmt.Println("Calling PevalString")
 	if err := ctx.PevalString(string(b)); err != nil {
 		log.Fatal(err)
 	}

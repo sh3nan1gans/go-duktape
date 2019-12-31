@@ -3,6 +3,7 @@
 
 #include "duk_module_duktape.h"
 #include "duk_console.h"
+#include "loop_init.h"
 
 static uv_loop_t loop;
 
@@ -448,7 +449,7 @@ static duk_ret_t duv_mod_compile(duk_context *ctx)
 
 static duk_ret_t duv_main(duk_context *ctx)
 {
-
+    printf("!!duv_main1!!\n");
     duk_push_global_object(ctx);
     duk_dup(ctx, -1);
     duk_put_prop_string(ctx, -2, "global");
@@ -475,11 +476,11 @@ static duk_ret_t duv_main(duk_context *ctx)
     duk_pop(ctx);
 
     // Put in some quick globals to test things.
-    duk_push_c_function(ctx, duv_path_join, DUK_VARARGS);
-    duk_put_prop_string(ctx, -2, "pathJoin");
+    // duk_push_c_function(ctx, duv_path_join, DUK_VARARGS);
+    // duk_put_prop_string(ctx, -2, "pathJoin");
 
-    duk_push_c_function(ctx, duv_loadfile, 1);
-    duk_put_prop_string(ctx, -2, "loadFile");
+    // duk_push_c_function(ctx, duv_loadfile, 1);
+    // duk_put_prop_string(ctx, -2, "loadFile");
 
     // require.call({id:uv.cwd()+"/main.c"}, path);
     duk_push_c_function(ctx, duv_require, 1);
@@ -499,9 +500,10 @@ static duk_ret_t duv_main(duk_context *ctx)
     duk_concat(ctx, 2);
     duk_put_prop_string(ctx, -2, "id");
     duk_dup(ctx, 0);
+    // this is the call that allows for uv timers
     duk_call_method(ctx, 1);
 
-    uv_run(&loop, UV_RUN_DEFAULT);
+    // uv_run(&loop, UV_RUN_DEFAULT);
 
     return 0;
 }
@@ -541,10 +543,10 @@ static void duv_dump_error(duk_context *ctx, duk_idx_t idx)
     }
 }
 
-int loop_de_loop()
+loop_init_rtn loop_de_loop()
 {
     // int argc = 2;
-    char *argv[] = {"./dukluv", "index.js"};
+    char *argv[] = {"./dukluv", "timers.js"};
     printf("loop de loop!");
     duk_context *ctx = NULL;
     uv_loop_init(&loop);
@@ -562,7 +564,11 @@ int loop_de_loop()
     if (!ctx)
     {
         fprintf(stderr, "Problem initiailizing duktape heap\n");
-        return -1;
+        loop_init_rtn temp = {
+            .ctx = ctx,
+            .loop = &loop,
+        };
+        return temp;
     }
     duk_module_duktape_init(ctx);
     duk_console_init(ctx, 0);
@@ -587,10 +593,22 @@ int loop_de_loop()
         duv_dump_error(ctx, -1);
         uv_loop_close(&loop);
         duk_destroy_heap(ctx);
-        return 1;
+        loop_init_rtn temp = {
+            .ctx = ctx,
+            .loop = &loop,
+        };
+        return temp;
     }
+    // duk_peval_string(ctx, "console.log('what is setTimeout', typeof setTimeout)");
+    duk_peval_string(ctx, "console.log('hi'); console.log('before timeout'); setTimeout(function() { console.log('inside timeout'); var id = setTimeout(function() { console.log('inside second timeout'); }, 2000); console.log('after first', id); setTimeout(function() { console.log('inside faster timeout'); }, 1000); }, 1000); console.log('after timeout');");
+    uv_run(&loop, UV_RUN_DEFAULT);
 
-    uv_loop_close(&loop);
-    duk_destroy_heap(ctx);
-    return 0;
+    // uv_loop_close(&loop);
+    // duk_destroy_heap(ctx);
+    loop_init_rtn temp = {
+        .ctx = ctx,
+        .loop = &loop,
+    };
+    printf("loop_de_loop final return!!1\n");
+    return temp;
 }

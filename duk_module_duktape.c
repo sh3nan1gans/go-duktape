@@ -437,6 +437,7 @@ static duk_ret_t duk__require(duk_context *ctx) {
 }
 
 void duk_module_duktape_init(duk_context *ctx) {
+	printf("duk_module_duktape_init\n");
 	/* Stash 'Duktape' in case it's modified. */
 	duk_push_global_stash(ctx);
 	duk_get_global_string(ctx, "Duktape");
