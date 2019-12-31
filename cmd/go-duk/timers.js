@@ -1,23 +1,18 @@
-// var setTimeout;
-// var clearTimeout;
-
-// (function() {
 var my_timers = {};
 var timer_id = 0;
 setTimeout = function(func, delay) {
-  console.log("inside setTimeout def");
   var cb_func;
   var bind_args;
 
   // Delay can be optional at least in some contexts, so tolerate that.
   // https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/setTimeout
-  //   if (typeof delay !== "number") {
-  //     if (typeof delay === "undefined") {
-  //       delay = 0;
-  //     } else {
-  //       throw new TypeError("invalid delay");
-  //     }
-  //   }
+  if (typeof delay !== "number") {
+    if (typeof delay === "undefined") {
+      delay = 0;
+    } else {
+      throw new TypeError("invalid delay");
+    }
+  }
 
   if (typeof func === "string") {
     // Legacy case: callback is a string.
@@ -39,9 +34,7 @@ setTimeout = function(func, delay) {
   var timer = uv.new_timer.call(context);
   my_timers[timer_id] = timer;
 
-  console.log("before timer_start");
   uv.timer_start(timer, delay, 0, function() {
-    console.log("in callback");
     uv.close.call(context, timer, function() {});
     delete my_timers[timer_id];
     cb_func();
@@ -64,4 +57,3 @@ clearTimeout = function(timer_id) {
   uv.close(timer);
   delete my_timers[timer_id];
 };
-// })();
